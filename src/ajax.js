@@ -69,12 +69,11 @@ export default function(opts) {
 
     req.open(options.method, url, true);
 
-    for (let i = 0, len = optionalProperties.length; i < len; i++) {
-      const field = optionalProperties[i];
-      if (typeof options[field] !== 'undefined') {
-        req[field] = options[field];
+    optionalProperties.forEach(p => {
+      if (typeof options[p] !== 'undefined') {
+        req[p] = options[p];
       }
-    }
+    });
 
     for (let field in headers) {
       req.setRequestHeader(field, headers[field]);

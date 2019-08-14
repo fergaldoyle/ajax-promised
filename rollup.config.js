@@ -4,17 +4,18 @@ import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 
 export default {
-  entry: 'src/ajax.js',
-  dest: 'dist/ajax-promised.js',
-  format: 'umd',
-  moduleName: 'ajax',
-  sourceMap: argv.w,
+  input: 'src/ajax.js',
+  output: {
+    file: 'dist/ajax-promised.js',
+    format: 'umd',
+    name: 'ajax',
+    sourcemap: argv.w,
+  },
   plugins: [
-    resolve({ jsnext: true, main: true }),
+    resolve(),
     commonjs(),
     babel({
-      exclude: 'node_modules/**',
-      plugins: ['external-helpers']
+      exclude: 'node_modules/**'
     })
   ]
 };
