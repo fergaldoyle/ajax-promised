@@ -12,16 +12,6 @@ function getRequest(cors) {
   return new XMLHttpRequest
 }
 
-const defaults = {
-  url: '',
-  headers: {},
-  data: {},
-  method: 'GET',
-  cache: true
-};
-
-const optionalProperties = ['responseType', 'withCredentials', 'timeout', 'onprogress'];
-
 function parseResponseData(req) {
   if (req.responseType) {
     return req.response;
@@ -31,6 +21,16 @@ function parseResponseData(req) {
   }
   return req.responseText;
 }
+
+const defaults = {
+  url: '',
+  headers: {},
+  data: {},
+  method: 'GET',
+  cache: true
+};
+
+const optionalProperties = ['responseType', 'withCredentials', 'timeout', 'onprogress'];
 
 export default function(opts) {
   return new Promise((resolve, reject) => {
@@ -75,7 +75,7 @@ export default function(opts) {
       }
     });
 
-    for (let field in headers) {
+    for (const field in headers) {
       req.setRequestHeader(field, headers[field]);
     }
 

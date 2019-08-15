@@ -274,15 +274,6 @@
 	  return new XMLHttpRequest();
 	}
 
-	var defaults = {
-	  url: '',
-	  headers: {},
-	  data: {},
-	  method: 'GET',
-	  cache: true
-	};
-	var optionalProperties = ['responseType', 'withCredentials', 'timeout', 'onprogress'];
-
 	function parseResponseData(req) {
 	  if (req.responseType) {
 	    return req.response;
@@ -297,6 +288,14 @@
 	  return req.responseText;
 	}
 
+	var defaults = {
+	  url: '',
+	  headers: {},
+	  data: {},
+	  method: 'GET',
+	  cache: true
+	};
+	var optionalProperties = ['responseType', 'withCredentials', 'timeout', 'onprogress'];
 	function ajax (opts) {
 	  return new Promise(function (resolve, reject) {
 	    if (typeof opts === 'string') {

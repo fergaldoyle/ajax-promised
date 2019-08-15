@@ -1,0 +1,10 @@
+{
+  "globals": {
+    "sinon": true,
+    "ajax": true,
+    "expect": true
+  },
+  "env": {
+    "mocha": true
+  }
+}

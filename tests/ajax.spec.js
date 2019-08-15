@@ -1,162 +1,123 @@
-import ajax from '../src/ajax.js';
-
 const fakeXhr = sinon.useFakeXMLHttpRequest();
-const requests = [];
-fakeXhr.onCreate = function(xhr) {
-  requests.push(xhr);
+let response;
+fakeXhr.onCreate = (xhr) => {
+  setTimeout(() => {
+    if (Array.isArray(response)) {
+      xhr.respond(...response)
+    } else {
+      xhr[response.fn]();
+    }
+  }, 1);
 }
 
-function respond() {
-  const request = requests.shift();
-  request.respond(...arguments);
-  return request;
-}
+describe('ajax', () => {
 
-describe('ajax', function() {
-
-  it('should default to a GET request', function() {
-    const p = ajax({
+  it('should default to a GET request', async () => {
+    response = [200, { 'Content-Type': 'text/plain' }, 'test'];
+    const { data, xhr } = await ajax({
       url: '/path',
-    }).then(({ data, status, xhr }) => {
-      expect(data).to.be.equal('test');
-      expect(xhr.method).to.be.equal('GET');
     });
-
-    respond(200, { 'Content-Type': 'text/plain' }, 'test');
-
-    return p;
+    expect(data).to.be.equal('test');
+    expect(xhr.method).to.be.equal('GET');
   });
 
-  it('should perform a POST request', function() {
-    const p = ajax({
+  it('should perform a POST request', async () => {
+    response = [200, { 'Content-Type': 'text/plain' }, 'test'];
+    const { data, xhr } = await ajax({
       url: '/path',
       method: 'POST'
-    }).then(({ data, status, xhr }) => {
-      expect(data).to.be.equal('test');
-      expect(xhr.method).to.be.equal('POST');
     });
-
-    respond(200, { 'Content-Type': 'text/plain' }, 'test');
-
-    return p;
+    expect(data).to.be.equal('test');
+    expect(xhr.method).to.be.equal('POST');
   });
 
-  it('should default to a GET request if arg is a string', function() {
-    const p = ajax('/path').then(({ data, status, xhr }) => {
-      expect(data).to.be.equal('test');
-    });
-
-    respond(200, { 'Content-Type': 'text/plain' }, 'test');
-
-    return p;
+  it('should default to a GET request if arg is a string', async () => {
+    response = [200, { 'Content-Type': 'text/plain' }, 'test'];
+    const { data } = await ajax('/path');
+    expect(data).to.be.equal('test');
   });
 
-  it('should automatically parse JSON response', function() {
-    const p = ajax({
+  it('should automatically parse JSON response', async () => {
+    response = [200, { 'Content-Type': 'application/json' }, '[{ "id": 12, "comment": "Hey there" }]'];
+    const { data } = await ajax({
       url: '/path',
-    }).then(({ data, status, xhr }) => {
-      expect(typeof data).to.be.equal('object');
     });
-
-    respond(200, { 'Content-Type': 'application/json' }, '[{ "id": 12, "comment": "Hey there" }]');
-
-    return p;
+    expect(typeof data).to.be.equal('object');
   });
 
-
-  it('should handle responseType', function() {
-    const p = ajax({
+  it('should handle responseType', async () => {
+    response = [200, { 'Content-Type': 'text/plain' }, 'test'];
+    const { data } = await ajax({
       url: '/path',
       responseType: 'arraybuffer'
-    }).then(({ data, status, xhr }) => {
-      expect(data instanceof ArrayBuffer).to.be.true;
     });
-
-    respond(200, { 'Content-Type': 'text/plain' }, 'test');
-
-    return p;
+    expect(data instanceof ArrayBuffer).to.be.true;
   });
 
-  it('should use timestamp when cache option is false', function() {
-    const p = ajax({
+  it('should use timestamp when cache option is false', async () => {
+    response = [200, { 'Content-Type': 'text/plain' }, 'test'];
+    const { xhr } = await ajax({
       url: '/path',
       cache: false
-    }).then(({ data, status, xhr }) => {
-      expect(xhr.url.match(/\?_=\d*/)).to.be.ok;
-    });
-
-    respond(200, { 'Content-Type': 'text/plain' }, 'test');
-
-    return p;
+    })
+    expect(xhr.url.match(/\?_=\d*/)).to.be.ok;
   });
 
-  it('should convert object to query string and handle existing query string', function() {
-    const p1 = ajax({
+  it('should convert object to query string and handle existing query string', async () => {
+    response = [200, { 'Content-Type': 'text/plain' }, 'test'];
+    const { xhr } = await ajax({
       url: '/path',
       data: {
         key: 'value',
         key2: 'value2'
       }
-    }).then(({ data, status, xhr }) => {
-      expect(xhr.url).to.be.equal('/path?key=value&key2=value2');
     });
-    respond(200, { 'Content-Type': 'text/plain' }, 'test');
+    expect(xhr.url).to.be.equal('/path?key=value&key2=value2');
 
-    const p2 = ajax({
+    const { xhr: xhr2 } = await ajax({
       url: '/path?a=b',
       data: {
         key: 'value'
       }
-    }).then(({ data, status, xhr }) => {
-      expect(xhr.url).to.be.equal('/path?a=b&key=value');
     });
-    respond(200, { 'Content-Type': 'text/plain' }, 'test');
-
-    return Promise.all([p1, p2]);
+    expect(xhr2.url).to.be.equal('/path?a=b&key=value');
   });
 
-
-  it('should handle onerror', function() {
-    const p = ajax({
+  it('should handle none ok responses', async () => {
+    response = [400, { 'Content-Type': 'text/plain' }, 'Bad request'];
+    const { status } = await ajax({
       url: '/path',
-    }).catch(({ data, status, xhr }) => {
-      expect(data).to.be.equal('Error');
-    });
-
-    requests.shift().error();
-
-    return p;
+    }).catch(d => d);
+    expect(status).to.be.equal('Bad Request');
   });
 
-
-  it('should handle none ok responses', function() {
-    const p = ajax({
+  it('should handle onerror', async () => {
+    response = { fn: 'error' };
+    const { data } = await ajax({
       url: '/path',
-    }).catch(({ data, status, xhr }) => {
-      expect(status).to.be.equal('Bad Request');
-    });
-
-    respond(400, { 'Content-Type': 'text/plain' }, 'Bad request');
-
-    return p;
+    }).catch(d => d);
+    expect(data).to.be.equal('Error');
   });
 
-  it('should handle ontimeout and onabort', function() {
-    const p1 = ajax({
+  it('should handle ontimeout', async () => {
+    response = { fn: 'ontimeout' };
+    const { data } = await ajax({
       url: '/path',
-    }).catch(() => {});
-    requests.shift().ontimeout();
-
-    const p2 = ajax({
-      url: '/path',
-    }).catch(() => {});
-    requests.shift().onabort();
-
-    return Promise.all([p1, p2]);
+    }).catch(d => d);
+    expect(data).to.be.equal('Timeout');
   });
 
-  it('should handle public options', function() {
-    const p = ajax({
+  it('should handle onabort', async () => {
+    response = { fn: 'onabort' };
+    const { data } = await ajax({
+      url: '/path',
+    }).catch(d => d);
+    expect(data).to.be.equal('Abort');
+  });
+
+  it('should handle public options', async () => {
+    response = [200, { 'Content-Type': 'text/plain' }, 'test'];
+    const { xhr } = await ajax({
       url: 'endpoint/path',
       headers: { 'accept': 'application/json;odata=verbose' },
       data: { key: 'value' },
@@ -164,21 +125,17 @@ describe('ajax', function() {
       responseType: 'blob',
       withCredentials: true,
       timeout: 100,
-      onprogress () { }
-    }).then(({ data, status, xhr }) => {
-      expect(xhr.url).to.be.equal('endpoint/path');
-      expect(xhr.requestHeaders.accept).to.be.equal('application/json;odata=verbose');
-      expect(xhr.requestBody.key).to.be.equal('value');
-      expect(xhr.method).to.be.equal('POST');
-      expect(xhr.responseType).to.be.equal('blob');
-      expect(xhr.withCredentials).to.be.true;
-      expect(xhr.timeout).to.be.equal(100);
-      expect(xhr.onprogress).to.be.ok;
+      onprogress() {}
     });
 
-    respond(200, { 'Content-Type': 'text/plain' }, 'test');
-
-    return p;
+    expect(xhr.url).to.be.equal('endpoint/path');
+    expect(xhr.requestHeaders.accept).to.be.equal('application/json;odata=verbose');
+    expect(xhr.requestBody.key).to.be.equal('value');
+    expect(xhr.method).to.be.equal('POST');
+    expect(xhr.responseType).to.be.equal('blob');
+    expect(xhr.withCredentials).to.be.true;
+    expect(xhr.timeout).to.be.equal(100);
+    expect(xhr.onprogress).to.be.ok;
   });
 
 });
