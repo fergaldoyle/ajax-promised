@@ -88,9 +88,9 @@ const { data } = await ajax({
   method: 'GET',
   cache: true, // if set to false, a cache busting timestamp will be added to the request url
   
-  // options with no default values
+  // below options have no default values
   headers, // Object - e.g. { 'accept': 'application/json;odata=verbose' }
-  data,
+  data, // POST data or GET query string object
   responseType, // String - e.g. 'blob', 'arraybuffer', etc. see MDN XMLHttpRequest.responseType
   withCredentials, // see MDN XMLHttpRequest.withCredentials
   timeout, // see MDN XMLHttpRequest.timeout
