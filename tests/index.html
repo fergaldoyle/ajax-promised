@@ -9,6 +9,57 @@
 </head>
 
 <body>
-    <script src="../dist/ajax-promised.js"></script>
+  <script src="../dist/ajax-promised.js"></script>
+  <script>
+    /***/
+    ajax({
+      url: 'https://reqres.in/api/users'
+    }).then(({ data, status, xhr }) => {
+      console.log('data', data);
+      console.log('status', status);
+      console.log('xhr', xhr);
+    });
+    /***/
+
+    /***/
+    ajax('https://reqres.in/api/users').then(({ data }) => {
+      console.log('data', data)
+    })
+    /***/
+
+    /***/
+    !async function(){
+
+      const { data, status, xhr } = await ajax({
+        url: 'https://reqres.in/api/users',
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        data: JSON.stringify({
+          "name": "morpheus",
+          "job": "leader"
+        })
+      });
+
+      console.log(data, status, xhr);
+
+    }()
+    /***/
+
+    /***/
+    !async function(){
+
+      const { data, status, xhr } = await ajax({
+        url: 'https://reqres.in/api/users/2',
+        method: 'DELETE'
+      });
+
+      console.log(data, status, xhr);
+
+    }()
+    /***/
+  </script>
 </body>
+
 </html>
