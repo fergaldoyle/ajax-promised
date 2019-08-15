@@ -24,8 +24,6 @@ function parseResponseData(req) {
 
 const defaults = {
   url: '',
-  headers: {},
-  data: {},
   method: 'GET',
   cache: true
 };
