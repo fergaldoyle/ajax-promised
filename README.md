@@ -1,5 +1,7 @@
 # ajax-promised
 
+`npm i ajax-promised`
+
 Simple ajax utility which returns a Promise. Automatically parses JSON response if response is `application/json`. Serializes an Object of key/value pairs for easy query string creation in GET requests. 
 Checks HTTP status codes and `rejects` unsuccessful requests for easy error handling. 
 
