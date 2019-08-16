@@ -290,8 +290,6 @@
 
 	var defaults = {
 	  url: '',
-	  headers: {},
-	  data: {},
 	  method: 'GET',
 	  cache: true
 	};
